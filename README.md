@@ -4,6 +4,10 @@ Transcription App using AssemblyAI API
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://aslyapi.streamlit.app/)
 [![Sponsor me on GitHub](https://img.shields.io/badge/Sponsor%20me%20on-GitHub-EA4AAA?logo=githubsponsors&style=flat-square)](https://github.com/sponsors/gituserc1140)
 
+## About
+
+A simple Streamlit web app that turns spoken audio into text using the [AssemblyAI](https://www.assemblyai.com/) speech-to-text API. You can either **record audio directly in your browser** via the built-in microphone, or **upload an existing audio file** (MP3, WAV, or M4A). The transcript is displayed on screen and can be downloaded as a Word document (`.docx`). A language selector lets you choose between English (US) for best accuracy on short clips, or automatic language detection for longer recordings.
+
 ## API key setup
 
 You can provide your `ASSEMBLYAI_API_KEY` in any of these ways:
