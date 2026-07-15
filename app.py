@@ -115,7 +115,10 @@ _CSS = """
     background: rgba(15,12,41,0.85);
     border-right: 1px solid rgba(167,139,250,0.2);
 }
-[data-testid="stSidebar"] * { color: #cbd5e1 !important; }
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] div { color: #cbd5e1 !important; }
 [data-testid="stSidebar"] h2 {
     color: #a78bfa !important;
     font-size: 1.1rem;
@@ -242,8 +245,7 @@ def main():
     )
     st.sidebar.markdown("---")
     st.sidebar.markdown(
-        "[![GitHub](https://img.shields.io/badge/View%20on-GitHub-181717?logo=github&style=flat-square)]"
-        "(https://github.com/gituserc1140/AssemblyAI-APP)"
+        "[![GitHub](https://img.shields.io/badge/View%20on-GitHub-181717?logo=github&style=flat-square)](https://github.com/gituserc1140/AssemblyAI-APP)"
     )
 
     stripped_api_key = api_key_input.strip()
