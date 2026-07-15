@@ -4,10 +4,12 @@ import os
 
 ENGLISH_US_LABEL = "English (US) - recommended"
 AUTO_DETECT_LABEL = "Auto-detect language"
-LANGUAGE_OPTIONS = {
-    ENGLISH_US_LABEL: "en_us",
-    AUTO_DETECT_LABEL: "auto",
-}
+LANGUAGE_CHOICES = [
+    (ENGLISH_US_LABEL, "en_us"),
+    (AUTO_DETECT_LABEL, "auto"),
+]
+LANGUAGE_OPTIONS = dict(LANGUAGE_CHOICES)
+AUTO_DETECT_ERROR_HINT = "Try a longer spoken clip or select a specific language instead of auto-detect."
 
 
 def get_configured_api_key():
@@ -26,7 +28,7 @@ def transcribe_file(file, api_key, language_option):
     transcript = transcriber.transcribe(file, config=config)
     if transcript.status == aai.TranscriptStatus.error:
         if language_option == "auto":
-            return f"Error: {transcript.error}. Try a longer spoken clip or select a specific language instead of auto-detect."
+            return f"Error: {transcript.error}. {AUTO_DETECT_ERROR_HINT}"
         return f"Error: {transcript.error}"
     return transcript.text
 
@@ -41,7 +43,7 @@ def main():
     )
     language_label = st.sidebar.selectbox(
         "Transcription Language",
-        list(LANGUAGE_OPTIONS.keys()),
+        [label for label, _ in LANGUAGE_CHOICES],
         index=0,
         help="Use a fixed language for better reliability on short clips. Auto-detect works best on longer spoken audio.",
     )
