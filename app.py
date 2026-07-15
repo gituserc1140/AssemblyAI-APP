@@ -42,9 +42,16 @@ def transcribe_file(file, api_key, language_option):
 
 
 def build_word_document(transcript_text):
-    """Create a minimal .docx payload from transcript text."""
+    """Return a minimal Word .docx payload for transcript text.
+
+    Args:
+        transcript_text: Transcript content to place in the document.
+
+    Returns:
+        Bytes for a .docx file download.
+    """
     document_buffer = BytesIO()
-    transcript_lines = transcript_text.splitlines() if transcript_text else []
+    transcript_lines = (transcript_text or "").splitlines()
     paragraph_xml_parts = [
         (
             "<w:p><w:r><w:t xml:space=\"preserve\">"
@@ -118,15 +125,15 @@ def main():
     def clear_transcription():
         st.session_state.reset_counter += 1
 
-    def show_transcription(audio_source, output_filename=None):
+    def show_transcription(audio_source, download_filename=None):
         transcription_result = transcribe_file(audio_source, api_key, selected_language)
         st.write("Transcription:")
         st.write(transcription_result["text"])
-        if output_filename and not transcription_result["has_error"]:
+        if download_filename and not transcription_result["has_error"]:
             st.download_button(
                 "Download transcript (.docx)",
                 data=build_word_document(transcription_result["text"]),
-                file_name=output_filename,
+                file_name=download_filename,
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             )
 
