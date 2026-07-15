@@ -1,6 +1,8 @@
 # AssemblyAI-APP
 App UI for AssemblyAI API
 
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://assemblyai-app.streamlit.app)
+
 ## API key setup
 
 You can provide your `ASSEMBLYAI_API_KEY` in any of these ways:
