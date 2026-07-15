@@ -58,6 +58,12 @@ def main():
         st.warning("Please enter your AssemblyAI API key in the sidebar to continue.")
         st.stop()
 
+    if "reset_counter" not in st.session_state:
+        st.session_state.reset_counter = 0
+
+    def clear_transcription():
+        st.session_state.reset_counter += 1
+
     def show_transcription(audio_source):
         transcript = transcribe_file(audio_source, api_key, selected_language)
         st.write("Transcription:")
@@ -65,15 +71,23 @@ def main():
 
     upload_tab, record_tab = st.tabs(["Upload File", "Record Audio"])
 
+    reset_key = st.session_state.reset_counter
+
     with upload_tab:
-        uploaded_file = st.file_uploader("Upload an audio file", type=["mp3", "wav", "m4a"])
+        uploaded_file = st.file_uploader(
+            "Upload an audio file",
+            type=["mp3", "wav", "m4a"],
+            key=f"upload_{reset_key}",
+        )
         if uploaded_file is not None:
             show_transcription(uploaded_file)
+            st.button("Clear", key="clear_upload", on_click=clear_transcription)
 
     with record_tab:
-        recorded_audio = st.audio_input("Click to record")
+        recorded_audio = st.audio_input("Click to record", key=f"record_{reset_key}")
         if recorded_audio is not None:
             show_transcription(recorded_audio)
+            st.button("Clear", key="clear_record", on_click=clear_transcription)
 
 if __name__ == "__main__":
     main()
