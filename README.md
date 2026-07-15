@@ -1,5 +1,5 @@
 # Transcription App
-App UI for AssemblyAI API
+Transcription App using AssemblyAI API
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://aslyapi.streamlit.app/)
 [![Sponsor me on GitHub](https://img.shields.io/badge/Sponsor%20me%20on-GitHub-EA4AAA?logo=githubsponsors&style=flat-square)](https://github.com/sponsors/gituserc1140)
