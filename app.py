@@ -16,6 +16,123 @@ LANGUAGE_OPTIONS = dict(LANGUAGE_CHOICES)
 AUTO_DETECT_ERROR_HINT = "Try a longer spoken clip or select a specific language instead of auto-detect."
 RECORDED_AUDIO_TRANSCRIPT_FILENAME = "recorded-audio-transcript.docx"
 
+_CSS = """
+<style>
+/* ── Page background ───────────────────────────────────────────── */
+[data-testid="stAppViewContainer"] {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+}
+[data-testid="stHeader"] { background: transparent; }
+
+/* ── Hero banner ───────────────────────────────────────────────── */
+.hero {
+    text-align: center;
+    padding: 2.5rem 1rem 1.5rem;
+}
+.hero h1 {
+    font-size: 2.6rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.3rem;
+}
+.hero p {
+    color: #cbd5e1;
+    font-size: 1.05rem;
+    margin-top: 0;
+}
+
+/* ── Tab bar ───────────────────────────────────────────────────── */
+[data-testid="stTabs"] [role="tablist"] {
+    gap: 0.5rem;
+    border-bottom: 2px solid #3730a3;
+}
+[data-testid="stTabs"] [role="tab"] {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px 10px 0 0;
+    padding: 0.5rem 1.4rem;
+    color: #a5b4fc !important;
+    font-weight: 600;
+    border: none;
+    transition: background 0.2s;
+}
+[data-testid="stTabs"] [role="tab"][aria-selected="true"] {
+    background: linear-gradient(135deg, #6d28d9, #3b82f6);
+    color: #fff !important;
+}
+
+/* ── Transcript result card ────────────────────────────────────── */
+.transcript-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(167,139,250,0.35);
+    border-radius: 14px;
+    padding: 1.4rem 1.6rem;
+    color: #e2e8f0;
+    font-size: 1rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin-top: 1rem;
+}
+.transcript-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #a78bfa;
+    margin-bottom: 0.4rem;
+}
+
+/* ── Error card ────────────────────────────────────────────────── */
+.error-card {
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.45);
+    border-radius: 14px;
+    padding: 1.2rem 1.6rem;
+    color: #fca5a5;
+    font-size: 0.97rem;
+    margin-top: 1rem;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────── */
+[data-testid="stDownloadButton"] button,
+[data-testid="stButton"] button {
+    background: linear-gradient(135deg, #7c3aed, #2563eb) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.45rem 1.2rem !important;
+    font-weight: 600 !important;
+    transition: opacity 0.2s !important;
+}
+[data-testid="stDownloadButton"] button:hover,
+[data-testid="stButton"] button:hover { opacity: 0.85 !important; }
+
+/* ── Sidebar ───────────────────────────────────────────────────── */
+[data-testid="stSidebar"] {
+    background: rgba(15,12,41,0.85);
+    border-right: 1px solid rgba(167,139,250,0.2);
+}
+[data-testid="stSidebar"] * { color: #cbd5e1 !important; }
+[data-testid="stSidebar"] h2 {
+    color: #a78bfa !important;
+    font-size: 1.1rem;
+}
+
+/* ── Spinner text ──────────────────────────────────────────────── */
+[data-testid="stSpinner"] p { color: #a5b4fc !important; }
+
+/* ── File uploader ─────────────────────────────────────────────── */
+[data-testid="stFileUploaderDropzone"] {
+    background: rgba(255,255,255,0.04) !important;
+    border: 2px dashed rgba(167,139,250,0.4) !important;
+    border-radius: 12px !important;
+}
+</style>
+"""
+
 
 def get_configured_api_key():
     if "ASSEMBLYAI_API_KEY" in st.secrets:
@@ -92,8 +209,26 @@ def build_word_document(transcript_text):
 
 
 def main():
-    st.title("AssemblyAI Transcription App")
-    st.sidebar.header("Settings")
+    st.set_page_config(
+        page_title="AssemblyAI Transcription",
+        page_icon="🎙️",
+        layout="centered",
+    )
+    st.markdown(_CSS, unsafe_allow_html=True)
+
+    # ── Hero header ────────────────────────────────────────────────
+    st.markdown(
+        """
+        <div class="hero">
+            <h1>🎙️ AssemblyAI Transcription</h1>
+            <p>Record or upload audio and get an accurate transcript in seconds.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # ── Sidebar ────────────────────────────────────────────────────
+    st.sidebar.header("⚙️ Settings")
     api_key_input = st.sidebar.text_input(
         "AssemblyAI API Key",
         type="password",
@@ -106,17 +241,17 @@ def main():
         help="Use a fixed language for better reliability on short clips. Auto-detect works best on longer spoken audio.",
     )
     st.sidebar.markdown("---")
-    st.sidebar.markdown("[![GitHub](https://img.shields.io/badge/View%20on-GitHub-181717?logo=github)](https://github.com/gituserc1140/AssemblyAI-APP)")
+    st.sidebar.markdown(
+        "[![GitHub](https://img.shields.io/badge/View%20on-GitHub-181717?logo=github&style=flat-square)]"
+        "(https://github.com/gituserc1140/AssemblyAI-APP)"
+    )
 
     stripped_api_key = api_key_input.strip()
-    if stripped_api_key:
-        api_key = stripped_api_key
-    else:
-        api_key = get_configured_api_key()
+    api_key = stripped_api_key if stripped_api_key else get_configured_api_key()
     selected_language = LANGUAGE_OPTIONS[language_label]
 
     if not api_key:
-        st.warning("Please enter your AssemblyAI API key in the sidebar to continue.")
+        st.warning("⚠️ Please enter your AssemblyAI API key in the sidebar to continue.")
         st.stop()
 
     if "reset_counter" not in st.session_state:
@@ -126,36 +261,47 @@ def main():
         st.session_state.reset_counter += 1
 
     def show_transcription(audio_source, download_filename=None):
-        transcription_result = transcribe_file(audio_source, api_key, selected_language)
-        st.write("Transcription:")
-        st.write(transcription_result["text"])
-        if download_filename and not transcription_result["has_error"]:
-            st.download_button(
-                "Download transcript (.docx)",
-                data=build_word_document(transcription_result["text"]),
-                file_name=download_filename,
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        with st.spinner("Transcribing… this may take a moment ✨"):
+            transcription_result = transcribe_file(audio_source, api_key, selected_language)
+
+        if transcription_result["has_error"]:
+            st.markdown(
+                f'<div class="error-card">⚠️ {html.escape(transcription_result["text"])}</div>',
+                unsafe_allow_html=True,
             )
+        else:
+            st.markdown('<div class="transcript-label">📝 Transcript</div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="transcript-card">{html.escape(transcription_result["text"])}</div>',
+                unsafe_allow_html=True,
+            )
+            if download_filename:
+                st.download_button(
+                    "⬇️ Download transcript (.docx)",
+                    data=build_word_document(transcription_result["text"]),
+                    file_name=download_filename,
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
 
-    record_tab, upload_tab = st.tabs(["Record Audio", "Upload File"])
-
+    # ── Tabs ───────────────────────────────────────────────────────
+    record_tab, upload_tab = st.tabs(["🎤  Record Audio", "📂  Upload File"])
     reset_key = st.session_state.reset_counter
 
     with record_tab:
-        recorded_audio = st.audio_input("Click to record", key=f"record_{reset_key}")
+        recorded_audio = st.audio_input("Click the microphone to start recording", key=f"record_{reset_key}")
         if recorded_audio is not None:
             show_transcription(recorded_audio, RECORDED_AUDIO_TRANSCRIPT_FILENAME)
-            st.button("Clear", key="clear_record", on_click=clear_transcription)
+            st.button("🗑️ Clear", key="clear_record", on_click=clear_transcription)
 
     with upload_tab:
         uploaded_file = st.file_uploader(
-            "Upload an audio file",
+            "Drag & drop an audio file, or click to browse",
             type=["mp3", "wav", "m4a"],
             key=f"upload_{reset_key}",
         )
         if uploaded_file is not None:
             show_transcription(uploaded_file)
-            st.button("Clear", key="clear_upload", on_click=clear_transcription)
+            st.button("🗑️ Clear", key="clear_upload", on_click=clear_transcription)
 
 if __name__ == "__main__":
     main()
