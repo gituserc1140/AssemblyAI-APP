@@ -19,7 +19,7 @@ def transcribe_file(file, api_key, language_option):
     transcript = transcriber.transcribe(file, config=config)
     if transcript.status == aai.TranscriptStatus.error:
         if language_option == "auto":
-            return f"Error: {transcript.error} Try a longer spoken clip, or switch the sidebar language to English (US)."
+            return f"Error: {transcript.error}. Try a longer spoken clip or switch the sidebar language to English (US)."
         return f"Error: {transcript.error}"
     return transcript.text
 
@@ -33,7 +33,7 @@ def main():
         help="Add your API key here, or configure ASSEMBLYAI_API_KEY in Streamlit secrets/environment.",
     )
     language_label = st.sidebar.selectbox(
-        "Transcription language",
+        "Transcription Language",
         ["English (US) - recommended", "Auto-detect language"],
         index=0,
         help="Use a fixed language for better reliability on short clips. Auto-detect works best on longer spoken audio.",
