@@ -4,6 +4,10 @@ import os
 
 ENGLISH_US_LABEL = "English (US) - recommended"
 AUTO_DETECT_LABEL = "Auto-detect language"
+LANGUAGE_OPTIONS = {
+    ENGLISH_US_LABEL: "en_us",
+    AUTO_DETECT_LABEL: "auto",
+}
 
 
 def get_configured_api_key():
@@ -37,7 +41,7 @@ def main():
     )
     language_label = st.sidebar.selectbox(
         "Transcription Language",
-        [ENGLISH_US_LABEL, AUTO_DETECT_LABEL],
+        list(LANGUAGE_OPTIONS.keys()),
         index=0,
         help="Use a fixed language for better reliability on short clips. Auto-detect works best on longer spoken audio.",
     )
@@ -46,7 +50,7 @@ def main():
         api_key = stripped_api_key
     else:
         api_key = get_configured_api_key()
-    selected_language = "en_us" if language_label == ENGLISH_US_LABEL else "auto"
+    selected_language = LANGUAGE_OPTIONS[language_label]
 
     if not api_key:
         st.warning("Please enter your AssemblyAI API key in the sidebar to continue.")
