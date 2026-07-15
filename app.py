@@ -1,6 +1,10 @@
-import streamlit as st
-import assemblyai as aai
+import html
 import os
+from io import BytesIO
+from zipfile import ZIP_DEFLATED, ZipFile
+
+import assemblyai as aai
+import streamlit as st
 
 ENGLISH_US_LABEL = "English (US) - recommended"
 AUTO_DETECT_LABEL = "Auto-detect language"
@@ -10,6 +14,7 @@ LANGUAGE_CHOICES = [
 ]
 LANGUAGE_OPTIONS = dict(LANGUAGE_CHOICES)
 AUTO_DETECT_ERROR_HINT = "Try a longer spoken clip or select a specific language instead of auto-detect."
+RECORDED_AUDIO_TRANSCRIPT_FILENAME = "recorded-audio-transcript.docx"
 
 
 def get_configured_api_key():
@@ -28,9 +33,62 @@ def transcribe_file(file, api_key, language_option):
     transcript = transcriber.transcribe(file, config=config)
     if transcript.status == aai.TranscriptStatus.error:
         if language_option == "auto":
-            return f"Error: {transcript.error}. {AUTO_DETECT_ERROR_HINT}"
-        return f"Error: {transcript.error}"
-    return transcript.text
+            return {
+                "text": f"Error: {transcript.error}. {AUTO_DETECT_ERROR_HINT}",
+                "has_error": True,
+            }
+        return {"text": f"Error: {transcript.error}", "has_error": True}
+    return {"text": transcript.text, "has_error": False}
+
+
+def build_word_document(transcript_text):
+    """Return a minimal Word .docx payload for transcript text.
+
+    Args:
+        transcript_text: Transcript content to place in the document.
+
+    Returns:
+        Bytes for a .docx file download.
+    """
+    document_buffer = BytesIO()
+    transcript_lines = (transcript_text or "").splitlines()
+    paragraph_xml_parts = [
+        (
+            "<w:p><w:r><w:t xml:space=\"preserve\">"
+            f"{html.escape(line)}"
+            "</w:t></w:r></w:p>"
+        )
+        for line in transcript_lines
+    ]
+    paragraph_xml = "".join(paragraph_xml_parts)
+    document_xml = (
+        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
+        "<w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\">"
+        f"<w:body>{paragraph_xml}<w:sectPr/></w:body>"
+        "</w:document>"
+    )
+    with ZipFile(document_buffer, "w", ZIP_DEFLATED) as document:
+        document.writestr(
+            "[Content_Types].xml",
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
+            "<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\">"
+            "<Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>"
+            "<Default Extension=\"xml\" ContentType=\"application/xml\"/>"
+            "<Override PartName=\"/word/document.xml\" "
+            "ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml\"/>"
+            "</Types>",
+        )
+        document.writestr(
+            "_rels/.rels",
+            "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
+            "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">"
+            "<Relationship Id=\"rId1\" "
+            "Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument\" "
+            "Target=\"word/document.xml\"/>"
+            "</Relationships>",
+        )
+        document.writestr("word/document.xml", document_xml)
+    return document_buffer.getvalue()
 
 
 def main():
@@ -67,14 +125,27 @@ def main():
     def clear_transcription():
         st.session_state.reset_counter += 1
 
-    def show_transcription(audio_source):
-        transcript = transcribe_file(audio_source, api_key, selected_language)
+    def show_transcription(audio_source, download_filename=None):
+        transcription_result = transcribe_file(audio_source, api_key, selected_language)
         st.write("Transcription:")
-        st.write(transcript)
+        st.write(transcription_result["text"])
+        if download_filename and not transcription_result["has_error"]:
+            st.download_button(
+                "Download transcript (.docx)",
+                data=build_word_document(transcription_result["text"]),
+                file_name=download_filename,
+                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            )
 
-    upload_tab, record_tab = st.tabs(["Upload File", "Record Audio"])
+    record_tab, upload_tab = st.tabs(["Record Audio", "Upload File"])
 
     reset_key = st.session_state.reset_counter
+
+    with record_tab:
+        recorded_audio = st.audio_input("Click to record", key=f"record_{reset_key}")
+        if recorded_audio is not None:
+            show_transcription(recorded_audio, RECORDED_AUDIO_TRANSCRIPT_FILENAME)
+            st.button("Clear", key="clear_record", on_click=clear_transcription)
 
     with upload_tab:
         uploaded_file = st.file_uploader(
@@ -85,12 +156,6 @@ def main():
         if uploaded_file is not None:
             show_transcription(uploaded_file)
             st.button("Clear", key="clear_upload", on_click=clear_transcription)
-
-    with record_tab:
-        recorded_audio = st.audio_input("Click to record", key=f"record_{reset_key}")
-        if recorded_audio is not None:
-            show_transcription(recorded_audio)
-            st.button("Clear", key="clear_record", on_click=clear_transcription)
 
 if __name__ == "__main__":
     main()
