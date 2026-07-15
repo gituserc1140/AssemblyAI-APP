@@ -2,18 +2,27 @@ import streamlit as st
 import assemblyai as aai
 import os
 
+
 def get_configured_api_key():
     if "ASSEMBLYAI_API_KEY" in st.secrets:
         return st.secrets["ASSEMBLYAI_API_KEY"]
     return os.getenv("ASSEMBLYAI_API_KEY", "")
 
-def transcribe_file(file, api_key):
+
+def transcribe_file(file, api_key, language_option):
     aai.settings.api_key = api_key
     transcriber = aai.Transcriber()
-    transcript = transcriber.transcribe(file)
+    if language_option == "auto":
+        config = aai.TranscriptionConfig(language_detection=True)
+    else:
+        config = aai.TranscriptionConfig(language_detection=False, language_code=language_option)
+    transcript = transcriber.transcribe(file, config=config)
     if transcript.status == aai.TranscriptStatus.error:
+        if "language_detection cannot be performed on files with no spoken audio" in str(transcript.error):
+            return "Error: No spoken audio was detected for language auto-detection. Try a speech recording or set a fixed language in the sidebar."
         return f"Error: {transcript.error}"
     return transcript.text
+
 
 def main():
     st.title("AssemblyAI Transcription App")
@@ -23,11 +32,18 @@ def main():
         type="password",
         help="Add your API key here, or configure ASSEMBLYAI_API_KEY in Streamlit secrets/environment.",
     )
+    language_label = st.sidebar.selectbox(
+        "Transcription language",
+        ["English (US) - recommended", "Auto-detect language"],
+        index=0,
+        help="Use a fixed language for better reliability on short clips. Auto-detect works best on longer spoken audio.",
+    )
     stripped_api_key = api_key_input.strip()
     if stripped_api_key:
         api_key = stripped_api_key
     else:
         api_key = get_configured_api_key()
+    selected_language = "en_us" if language_label == "English (US) - recommended" else "auto"
 
     if not api_key:
         st.warning("Please enter your AssemblyAI API key in the sidebar to continue.")
@@ -35,7 +51,7 @@ def main():
 
     uploaded_file = st.file_uploader("Upload an audio file", type=["mp3", "wav", "m4a"])
     if uploaded_file is not None:
-        transcript = transcribe_file(uploaded_file, api_key)
+        transcript = transcribe_file(uploaded_file, api_key, selected_language)
         st.write("Transcription:")
         st.write(transcript)
 
