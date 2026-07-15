@@ -18,8 +18,8 @@ def transcribe_file(file, api_key, language_option):
         config = aai.TranscriptionConfig(language_detection=False, language_code=language_option)
     transcript = transcriber.transcribe(file, config=config)
     if transcript.status == aai.TranscriptStatus.error:
-        if "language_detection cannot be performed on files with no spoken audio" in str(transcript.error):
-            return "Error: No spoken audio was detected for language auto-detection. Try a speech recording or set a fixed language in the sidebar."
+        if language_option == "auto":
+            return f"Error: {transcript.error} Try a longer spoken clip, or switch the sidebar language to English (US)."
         return f"Error: {transcript.error}"
     return transcript.text
 
