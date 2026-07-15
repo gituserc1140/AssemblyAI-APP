@@ -32,9 +32,12 @@ def transcribe_file(file, api_key, language_option):
     transcript = transcriber.transcribe(file, config=config)
     if transcript.status == aai.TranscriptStatus.error:
         if language_option == "auto":
-            return f"Error: {transcript.error}. {AUTO_DETECT_ERROR_HINT}", True
-        return f"Error: {transcript.error}", True
-    return transcript.text, False
+            return {
+                "text": f"Error: {transcript.error}. {AUTO_DETECT_ERROR_HINT}",
+                "has_error": True,
+            }
+        return {"text": f"Error: {transcript.error}", "has_error": True}
+    return {"text": transcript.text, "has_error": False}
 
 
 def build_word_document(transcript_text):
@@ -113,13 +116,13 @@ def main():
         st.session_state.reset_counter += 1
 
     def show_transcription(audio_source, download_file_name=None):
-        transcript, has_error = transcribe_file(audio_source, api_key, selected_language)
+        transcription_result = transcribe_file(audio_source, api_key, selected_language)
         st.write("Transcription:")
-        st.write(transcript)
-        if download_file_name and not has_error:
+        st.write(transcription_result["text"])
+        if download_file_name and not transcription_result["has_error"]:
             st.download_button(
                 "Download transcript (.docx)",
-                data=build_word_document(transcript),
+                data=build_word_document(transcription_result["text"]),
                 file_name=download_file_name,
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             )
