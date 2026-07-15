@@ -213,7 +213,7 @@ def build_word_document(transcript_text):
 
 def main():
     st.set_page_config(
-        page_title="AssemblyAI Transcription",
+        page_title="Transcription App",
         page_icon="🎙️",
         layout="centered",
     )
@@ -223,7 +223,7 @@ def main():
     st.markdown(
         """
         <div class="hero">
-            <h1>🎙️ AssemblyAI Transcription</h1>
+            <h1>🎙️ Transcription App</h1>
             <p>Record or upload audio and get an accurate transcript in seconds.</p>
         </div>
         """,
