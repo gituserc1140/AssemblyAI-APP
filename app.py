@@ -44,17 +44,16 @@ def transcribe_file(file, api_key, language_option):
 def build_word_document(transcript_text):
     """Create a minimal .docx payload from transcript text."""
     document_buffer = BytesIO()
-    transcript_lines = transcript_text.splitlines()
-    if not transcript_lines:
-        transcript_lines = [transcript_text]
-    paragraph_xml = "".join(
+    transcript_lines = transcript_text.splitlines() if transcript_text else [" "]
+    paragraph_xml_parts = [
         (
             "<w:p><w:r><w:t xml:space=\"preserve\">"
             f"{html.escape(line)}"
             "</w:t></w:r></w:p>"
         )
         for line in transcript_lines
-    )
+    ]
+    paragraph_xml = "".join(paragraph_xml_parts)
     document_xml = (
         "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
         "<w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\">"
@@ -119,15 +118,15 @@ def main():
     def clear_transcription():
         st.session_state.reset_counter += 1
 
-    def show_transcription(audio_source, docx_filename=None):
+    def show_transcription(audio_source, output_filename=None):
         transcription_result = transcribe_file(audio_source, api_key, selected_language)
         st.write("Transcription:")
         st.write(transcription_result["text"])
-        if docx_filename and not transcription_result["has_error"]:
+        if output_filename and not transcription_result["has_error"]:
             st.download_button(
                 "Download transcript (.docx)",
                 data=build_word_document(transcription_result["text"]),
-                file_name=docx_filename,
+                file_name=output_filename,
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             )
 
