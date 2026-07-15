@@ -58,11 +58,22 @@ def main():
         st.warning("Please enter your AssemblyAI API key in the sidebar to continue.")
         st.stop()
 
-    uploaded_file = st.file_uploader("Upload an audio file", type=["mp3", "wav", "m4a"])
-    if uploaded_file is not None:
-        transcript = transcribe_file(uploaded_file, api_key, selected_language)
+    def show_transcription(audio_source):
+        transcript = transcribe_file(audio_source, api_key, selected_language)
         st.write("Transcription:")
         st.write(transcript)
+
+    upload_tab, record_tab = st.tabs(["Upload File", "Record Audio"])
+
+    with upload_tab:
+        uploaded_file = st.file_uploader("Upload an audio file", type=["mp3", "wav", "m4a"])
+        if uploaded_file is not None:
+            show_transcription(uploaded_file)
+
+    with record_tab:
+        recorded_audio = st.audio_input("Click to record")
+        if recorded_audio is not None:
+            show_transcription(recorded_audio)
 
 if __name__ == "__main__":
     main()
