@@ -2,6 +2,9 @@ import streamlit as st
 import assemblyai as aai
 import os
 
+ENGLISH_US_LABEL = "English (US) - recommended"
+AUTO_DETECT_LABEL = "Auto-detect language"
+
 
 def get_configured_api_key():
     if "ASSEMBLYAI_API_KEY" in st.secrets:
@@ -19,7 +22,7 @@ def transcribe_file(file, api_key, language_option):
     transcript = transcriber.transcribe(file, config=config)
     if transcript.status == aai.TranscriptStatus.error:
         if language_option == "auto":
-            return f"Error: {transcript.error}. Try a longer spoken clip or switch the sidebar language to English (US)."
+            return f"Error: {transcript.error}. Try a longer spoken clip or select a specific language instead of auto-detect."
         return f"Error: {transcript.error}"
     return transcript.text
 
@@ -34,7 +37,7 @@ def main():
     )
     language_label = st.sidebar.selectbox(
         "Transcription Language",
-        ["English (US) - recommended", "Auto-detect language"],
+        [ENGLISH_US_LABEL, AUTO_DETECT_LABEL],
         index=0,
         help="Use a fixed language for better reliability on short clips. Auto-detect works best on longer spoken audio.",
     )
@@ -43,7 +46,7 @@ def main():
         api_key = stripped_api_key
     else:
         api_key = get_configured_api_key()
-    selected_language = "en_us" if language_label == "English (US) - recommended" else "auto"
+    selected_language = "en_us" if language_label == ENGLISH_US_LABEL else "auto"
 
     if not api_key:
         st.warning("Please enter your AssemblyAI API key in the sidebar to continue.")
