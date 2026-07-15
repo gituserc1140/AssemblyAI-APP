@@ -44,7 +44,7 @@ def transcribe_file(file, api_key, language_option):
 def build_word_document(transcript_text):
     """Create a minimal .docx payload from transcript text."""
     document_buffer = BytesIO()
-    transcript_lines = transcript_text.splitlines() if transcript_text else [" "]
+    transcript_lines = transcript_text.splitlines() if transcript_text else []
     paragraph_xml_parts = [
         (
             "<w:p><w:r><w:t xml:space=\"preserve\">"
