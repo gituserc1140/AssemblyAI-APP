@@ -47,6 +47,9 @@ def main():
         index=0,
         help="Use a fixed language for better reliability on short clips. Auto-detect works best on longer spoken audio.",
     )
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("[![GitHub](https://img.shields.io/badge/View%20on-GitHub-181717?logo=github)](https://github.com/gituserc1140/AssemblyAI-APP)")
+
     stripped_api_key = api_key_input.strip()
     if stripped_api_key:
         api_key = stripped_api_key
