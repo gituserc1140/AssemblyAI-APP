@@ -14,6 +14,7 @@ LANGUAGE_CHOICES = [
 ]
 LANGUAGE_OPTIONS = dict(LANGUAGE_CHOICES)
 AUTO_DETECT_ERROR_HINT = "Try a longer spoken clip or select a specific language instead of auto-detect."
+RECORDED_AUDIO_TRANSCRIPT_FILENAME = "recorded-audio-transcript.docx"
 
 
 def get_configured_api_key():
@@ -118,15 +119,15 @@ def main():
     def clear_transcription():
         st.session_state.reset_counter += 1
 
-    def show_transcription(audio_source, transcript_filename=None):
+    def show_transcription(audio_source, docx_filename=None):
         transcription_result = transcribe_file(audio_source, api_key, selected_language)
         st.write("Transcription:")
         st.write(transcription_result["text"])
-        if transcript_filename and not transcription_result["has_error"]:
+        if docx_filename and not transcription_result["has_error"]:
             st.download_button(
                 "Download transcript (.docx)",
                 data=build_word_document(transcription_result["text"]),
-                file_name=transcript_filename,
+                file_name=docx_filename,
                 mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             )
 
@@ -137,7 +138,7 @@ def main():
     with record_tab:
         recorded_audio = st.audio_input("Click to record", key=f"record_{reset_key}")
         if recorded_audio is not None:
-            show_transcription(recorded_audio, "recorded-audio-transcript.docx")
+            show_transcription(recorded_audio, RECORDED_AUDIO_TRANSCRIPT_FILENAME)
             st.button("Clear", key="clear_record", on_click=clear_transcription)
 
     with upload_tab:
