@@ -231,7 +231,7 @@ def main():
     )
 
     # ── Sidebar ────────────────────────────────────────────────────
-    st.sidebar.header("⚙️ Settings")
+    st.sidebar.header("Settings")
     api_key_input = st.sidebar.text_input(
         "AssemblyAI API Key",
         type="password",
@@ -289,7 +289,7 @@ def main():
                 )
 
     # ── Tabs ───────────────────────────────────────────────────────
-    record_tab, upload_tab = st.tabs(["🎤  Record Audio", "📂  Upload File"])
+    record_tab, upload_tab = st.tabs(["Record Audio", "Upload File"])
     reset_key = st.session_state.reset_counter
 
     with record_tab:
