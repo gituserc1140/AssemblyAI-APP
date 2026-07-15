@@ -1,6 +1,8 @@
-import streamlit as st
-import assemblyai as aai
 import os
+import html
+
+import assemblyai as aai
+import streamlit as st
 
 ENGLISH_US_LABEL = "English (US) - recommended"
 AUTO_DETECT_LABEL = "Auto-detect language"
@@ -31,6 +33,15 @@ def transcribe_file(file, api_key, language_option):
             return f"Error: {transcript.error}. {AUTO_DETECT_ERROR_HINT}"
         return f"Error: {transcript.error}"
     return transcript.text
+
+
+def build_word_document(transcript_text):
+    formatted_text = html.escape(transcript_text).replace("\n", "<br>")
+    document = (
+        "<html><head><meta charset=\"utf-8\"></head>"
+        f"<body><p>{formatted_text}</p></body></html>"
+    )
+    return document.encode("utf-8")
 
 
 def main():
@@ -67,14 +78,27 @@ def main():
     def clear_transcription():
         st.session_state.reset_counter += 1
 
-    def show_transcription(audio_source):
+    def show_transcription(audio_source, download_file_name=None):
         transcript = transcribe_file(audio_source, api_key, selected_language)
         st.write("Transcription:")
         st.write(transcript)
+        if download_file_name and not transcript.startswith("Error:"):
+            st.download_button(
+                "Download transcript (.doc)",
+                data=build_word_document(transcript),
+                file_name=download_file_name,
+                mime="application/msword",
+            )
 
-    upload_tab, record_tab = st.tabs(["Upload File", "Record Audio"])
+    record_tab, upload_tab = st.tabs(["Record Audio", "Upload File"])
 
     reset_key = st.session_state.reset_counter
+
+    with record_tab:
+        recorded_audio = st.audio_input("Click to record", key=f"record_{reset_key}")
+        if recorded_audio is not None:
+            show_transcription(recorded_audio, "recorded-audio-transcript.doc")
+            st.button("Clear", key="clear_record", on_click=clear_transcription)
 
     with upload_tab:
         uploaded_file = st.file_uploader(
@@ -85,12 +109,6 @@ def main():
         if uploaded_file is not None:
             show_transcription(uploaded_file)
             st.button("Clear", key="clear_upload", on_click=clear_transcription)
-
-    with record_tab:
-        recorded_audio = st.audio_input("Click to record", key=f"record_{reset_key}")
-        if recorded_audio is not None:
-            show_transcription(recorded_audio)
-            st.button("Clear", key="clear_record", on_click=clear_transcription)
 
 if __name__ == "__main__":
     main()
