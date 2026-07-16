@@ -124,6 +124,9 @@ _CSS = """
     font-size: 1.1rem;
 }
 
+/* ── Warning text ──────────────────────────────────────────────── */
+[data-testid="stAlert"] p { color: #ffffff !important; }
+
 /* ── Spinner text ──────────────────────────────────────────────── */
 [data-testid="stSpinner"] p { color: #a5b4fc !important; }
 
