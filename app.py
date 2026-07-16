@@ -256,7 +256,7 @@ def main():
     selected_language = LANGUAGE_OPTIONS[language_label]
 
     if not api_key:
-        st.warning("⚠️ Please enter your AssemblyAI API key in the sidebar to continue.")
+        st.warning("Please enter your AssemblyAI API key in the sidebar to continue.", icon=None)
         st.stop()
 
     if "reset_counter" not in st.session_state:
