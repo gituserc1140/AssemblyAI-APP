@@ -240,6 +240,11 @@ def main():
         type="password",
         help="Add your API key here, or configure ASSEMBLYAI_API_KEY in Streamlit secrets/environment.",
     )
+    st.sidebar.markdown(
+        "<small><a href='https://www.assemblyai.com/app/account' target='_blank' "
+        "style='color:#a78bfa;text-decoration:none;'>🔑 Get your API key</a></small>",
+        unsafe_allow_html=True,
+    )
     language_label = st.sidebar.selectbox(
         "Transcription Language",
         [label for label, _ in LANGUAGE_CHOICES],
